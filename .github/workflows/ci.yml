@@ -1,0 +1,50 @@
+name: CI for Poster Kata
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run tests
+      run: |
+        # Add your test commands here, e.g., pytest
+
+    - name: Build Docker image
+      run: |
+        docker build -t poster-kata:${{ github.sha }} .
+
+    - name: Push Docker image to GitHub Packages
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        docker tag poster-kata:${{ github.sha }} ghcr.io/${{ github.repository }}/poster-kata:${{ github.sha }}
+        docker push ghcr.io/${{ github.repository }}/poster-kata:${{ github.sha }}
