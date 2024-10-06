@@ -17,11 +17,17 @@ def main():
 
 @cli.command()
 def load_source_data():
+    """
+    Loads the source data into the database.
+    """
     loader = ETL()
     loader.load_source_data()
 
 @cli.command()
 def transform_load_dw_data():
+    """
+    Transforms and loads the data into the data warehouse.
+    """
     loader = ETL()
     loader.transform_load_dw_data()
 

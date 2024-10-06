@@ -25,3 +25,4 @@ setup(
         poster-kata=app.command:cli
     """
 )
+

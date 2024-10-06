@@ -62,4 +62,8 @@ We welcome contributions from the community. If you wish to contribute to `Poste
 
 ```bash
 poster-kata --help
+# This command inserts data into the source table
+poster-kata load-source-data
+# This command transforms and loads the data into the data warehouse
+poster-kata transform-load-dw-data
 ```
