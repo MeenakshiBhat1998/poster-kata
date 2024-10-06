@@ -1,20 +1,22 @@
-name: CI for Poster Kata
+name: Python application CI
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     services:
       postgres:
         image: postgres:12
         env:
-          POSTGRES_DB: test
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
+          POSTGRES_DB: yourdbname
+          POSTGRES_USER: youruser
+          POSTGRES_PASSWORD: yourpassword
         ports:
           - 5432:5432
         options: >-
@@ -26,13 +28,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python
+    - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
 
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install -r requirements.txt
 
     - name: Run tests
@@ -41,10 +44,12 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t poster-kata:${{ github.sha }} .
+        docker build -t myapp:${{ github.sha }} .
+
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
     - name: Push Docker image to GitHub Packages
       run: |
-        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        docker tag poster-kata:${{ github.sha }} ghcr.io/${{ github.repository }}/poster-kata:${{ github.sha }}
-        docker push ghcr.io/${{ github.repository }}/poster-kata:${{ github.sha }}
+        docker tag myapp:${{ github.sha }} ghcr.io/meenakshibhat1998/poster-kata:${{ github.sha }}
+        docker push ghcr.io/meenakshibhat1998/poster-kata:${{ github.sha }}
